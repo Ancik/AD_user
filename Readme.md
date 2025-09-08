@@ -22,8 +22,7 @@ Installation
 
 1. Ensure you have the Active Directory module installed (part of RSAT on Windows).
    - Install RSAT via Settings > Apps > Optional Features, or run Install-WindowsFeature RSAT-AD-PowerShell on a server.
-2. Clone or download this repository:
-   git clone https://github.com/Ancik/AD_user/git
+2. Download script
 3. Place your users.csv and depts.csv files in the script directory (see Usage for format).
 
 ⚠️ Requirements
