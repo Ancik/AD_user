@@ -40,8 +40,9 @@ Create two CSV files in the same directory as the script:
 FirstName,LastName,DepartmentID
 John,Doe,101
 Jane,Smith,102
-depts.csv (Semicolon-delimited)
 
+**`dept.csv`** (Semicolon-delimited)
+```csv
 DepartmentID;DepartmentOU
 101;OU=Sales,OU=Users,DC=example,DC=com
 102;OU=Marketing,OU=Users,DC=example,DC=com
