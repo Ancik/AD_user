@@ -1,6 +1,3 @@
-<p align="center">
-  <img src="./logo1.png" alt="Active Directory User Provisioning Script Banner" width="100%" />
-</p>
 # 🛠️ Active Directory User Provisioning Script
 AD User Creation Script
 
@@ -26,7 +23,7 @@ Installation
 1. Ensure you have the Active Directory module installed (part of RSAT on Windows).
    - Install RSAT via Settings > Apps > Optional Features, or run Install-WindowsFeature RSAT-AD-PowerShell on a server.
 2. Clone or download this repository:
-   git clone https://github.com/yourusername/ad-user-creation.git
+   git clone https://github.com/ancik/ad-user.git
 3. Place your users.csv and depts.csv files in the script directory (see Usage for format).
 
 ⚠️ Requirements
