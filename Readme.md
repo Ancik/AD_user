@@ -44,6 +44,8 @@ CSV File Format
   IT101;OU=IT,DC=example,DC=local
   IT105;OU=Finance,DC=example,DC=local
 
+🚀 Usage
+
 Running the Script
 1. Open PowerShell with administrative privileges.
 2. Run the script with required parameters:
@@ -53,9 +55,25 @@ Running the Script
    - Run with additional parameters:
      .\New-AdUsers.ps1 -UsersCsv .\users.csv -DeptsCsv .\depts.csv -UpnSuffix "@example.local" -MailDomain "example.com" -UseRandomPassword -PasswordLogKeyBase64 $key
 
-Output
+📜 Example Log Output
 - Logs are written to the console with timestamps and levels.
 - Encrypted password logs (if enabled) are saved to passwords.log.enc.
+
+✅ Why this version?
+
+During analysis of the original exercise, I noticed some real-world gaps:
+
+AD username length limit (20 chars) → handled with truncation and suffixes
+
+messy or incomplete input data → validated and logged, not causing crashes
+
+OU references that don’t exist in AD → validated before creation
+
+overly verbose AD errors → trimmed and categorized
+
+insecure plain-text password logs → optional encrypted logs
+
+These improvements weren’t part of the original task, but make the script robust, predictable, and production-ready.
 
 Contributing
 
@@ -80,7 +98,7 @@ Testing
 Created by [Volodymyr Lisovyi](https://www.linkedin.com/in/volodymyr-lisovyi-66447649/)
 
 
-License
+📜 License
 
 MIT License - Feel free to use, modify, and distribute this script, but please include the original copyright notice.
 
