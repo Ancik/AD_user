@@ -57,15 +57,25 @@ Running the Script
    - Run with additional parameters:
      .\New-AdUsers.ps1 -UsersCsv .\users.csv -DeptsCsv .\depts.csv -UpnSuffix "@example.local" -MailDomain "example.com" -UseRandomPassword -PasswordLogKeyBase64 $key
 
-Parameter Reference
+   Parameter Reference
+
 -UsersCsv: Path to the user data file.
+
 -DeptsCsv: Path to the department-to-OU mapping file.
+
+
 -UpnSuffix: The UPN suffix for user accounts (e.g., @example.local).
+
 -MailDomain: The mail domain for user accounts (e.g., example.com).
+
 -MaxUsers: A safety limit on the number of users to process (default: 100).
+
 -UseRandomPassword: A switch to enable the use of random passwords.
+
 -FixedPassword: The fixed password used when -UseRandomPassword is not set.
+
 -PasswordLogPath: File path for the encrypted password log (only used with -UseRandomPassword).
+
 -PasswordLogKeyBase64: A Base64-encoded key required to encrypt the password log.  
 
 📜 Example Log Output
