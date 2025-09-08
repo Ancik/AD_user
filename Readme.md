@@ -42,15 +42,13 @@ John,Doe,101
 Jane,Smith,102
 depts.csv (Semicolon-delimited)
 
-Фрагмент коду
-
 DepartmentID;DepartmentOU
 101;OU=Sales,OU=Users,DC=example,DC=com
 102;OU=Marketing,OU=Users,DC=example,DC=com
 3. Running the Script
 Run the script from an elevated PowerShell console.
 
-Basic Usage (with fixed password)
+#### **3. Basic Usage (with fixed password)
 
 PowerShell
 
