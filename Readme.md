@@ -1,3 +1,6 @@
+<p align="center">
+  <img src="./logo1.png" alt="Active Directory User Provisioning Script Banner" width="100%" />
+</p>
 # 🛠️ Active Directory User Provisioning Script
 AD User Creation Script
 
