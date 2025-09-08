@@ -26,11 +26,13 @@ Installation
    git clone https://github.com/yourusername/ad-user-creation.git
 3. Place your users.csv and depts.csv files in the script directory (see Usage for format).
 
-Usage
+⚠️ Requirements
 
-Prerequisites
-- PowerShell 5.1 or later.
-- Active Directory environment with appropriate permissions.
+Windows Server with RSAT Active Directory module
+
+Permissions to create users in the target OUs
+
+PowerShell 5.1+
 
 ## 📂 Input Files
 
@@ -55,9 +57,24 @@ Running the Script
    - Run with additional parameters:
      .\New-AdUsers.ps1 -UsersCsv .\users.csv -DeptsCsv .\depts.csv -UpnSuffix "@example.local" -MailDomain "example.com" -UseRandomPassword -PasswordLogKeyBase64 $key
 
+Parameter Reference
+-UsersCsv: Path to the user data file.
+-DeptsCsv: Path to the department-to-OU mapping file.
+-UpnSuffix: The UPN suffix for user accounts (e.g., @example.local).
+-MailDomain: The mail domain for user accounts (e.g., example.com).
+-MaxUsers: A safety limit on the number of users to process (default: 100).
+-UseRandomPassword: A switch to enable the use of random passwords.
+-FixedPassword: The fixed password used when -UseRandomPassword is not set.
+-PasswordLogPath: File path for the encrypted password log (only used with -UseRandomPassword).
+-PasswordLogKeyBase64: A Base64-encoded key required to encrypt the password log.  
+
 📜 Example Log Output
 - Logs are written to the console with timestamps and levels.
 - Encrypted password logs (if enabled) are saved to passwords.log.enc.
+[2025-09-08 11:23:45] Info User created User=jdoe UPN=jdoe@example.local Dept=IT105 Display=John Doe
+[2025-09-08 11:23:45] DuplicateUserInAD User already exists, skipping User=asmith UPN=asmith@example.local Dept=FIN101 Display=Alice Smith
+[2025-09-08 11:23:45] MissingOU No OU mapping for department, skipping User=bbrown UPN=bbrown@example.local Dept=HR999 Display=Bob Brown
+
 
 ✅ Why this version?
 
