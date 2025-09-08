@@ -9,7 +9,7 @@ This script reads user data from users.csv (containing FirstName, LastName, and 
 
 Perfect for sysadmins looking to streamline user provisioning while avoiding common pitfalls like invalid data or missing OUs!
 
-Features
+## ✨ Features
 - Input Validation: Skips rows with missing or invalid FirstName, LastName, or DepartmentID.
 - Username Management: Truncates names to 20 characters and adds suffixes for uniqueness.
 - OU Verification: Checks if the target OU exists in AD before creating users.
@@ -31,6 +31,8 @@ Usage
 Prerequisites
 - PowerShell 5.1 or later.
 - Active Directory environment with appropriate permissions.
+
+## 📂 Input Files
 
 CSV File Format
 - users.csv:
