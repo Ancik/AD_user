@@ -1,6 +1,7 @@
 # 🛠️ Active Directory User Provisioning Script
 
 A PowerShell script to automate bulk user creation in Active Directory from CSV files.  
+
 Originally designed as a coding exercise, later expanded to cover **real-world AD limitations and pitfalls**.
 This script reads user data from users.csv (containing FirstName, LastName, and DepartmentID) and OU mappings from depts.csv (with DepartmentID and DepartmentOU). It generates ASCII-only usernames (first initial + last name, lowercase), ensures they fit AD's 20-character limit, handles duplicates with numeric suffixes (-01 to -99), and creates users in the correct Organizational Units (OUs). The script includes comprehensive logging, input validation, and an option to use encrypted random passwords for added security.
 
