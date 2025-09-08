@@ -1,83 +1,83 @@
-# PowerShell Script for Automated Active Directory User Provisioning
+AD User Creation Script
 
-This robust PowerShell script automates the process of creating new user accounts in Active Directory. It reads user and department information from CSV files, generates unique usernames, handles potential conflicts, and places users in the correct Organizational Units (OUs).
+A robust PowerShell script to automate the creation of Active Directory (AD) users from CSV files, with enhanced validation, logging, and security features.
 
----
+Overview
 
-### **Key Features**
+This script reads user data from users.csv (containing FirstName, LastName, and DepartmentID) and OU mappings from depts.csv (with DepartmentID and DepartmentOU). It generates ASCII-only usernames (first initial + last name, lowercase), ensures they fit AD's 20-character limit, handles duplicates with numeric suffixes (-01 to -99), and creates users in the correct Organizational Units (OUs). The script includes comprehensive logging, input validation, and an option to use encrypted random passwords for added security.
 
-* **Flexible Input**: Reads user data from a `users.csv` file and department-to-OU mappings from a `depts.csv` file.
-* **Intelligent Username Generation**:
-    * Generates `sAMAccountName` and `UserPrincipalName` (UPN) based on a consistent policy (first initial + last name).
-    * Automatically **normalizes names to ASCII** to ensure compatibility with Active Directory.
-    * Handles long names by **truncating `sAMAccountName` to 20 characters**, a standard AD limit.
-    * **Deduplicates usernames** by adding a numeric suffix (e.g., `jdoe-01`) if a conflict is found, ensuring every account is unique.
-* **Robust Validation and Error Handling**:
-    * **Validates input data** from the CSV files, skipping any rows with missing or invalid information.
-    * **Verifies that OUs exist in Active Directory** before attempting to create a user in them.
-    * Includes comprehensive `try...catch` blocks to gracefully handle and log any errors during the process.
-* **Enhanced Security**:
-    * By default, assigns a fixed password and requires a change at first logon.
-    * Includes an option to use **cryptographically-secure random passwords**.
-    * Provides an **encrypted logging** mechanism for random passwords, ensuring sensitive data is not stored in plaintext.
-* **Detailed Logging**: All actions, including user creation, skipped entries, warnings, and errors, are logged with timestamps and clear contextual information, making it easy to audit the script's run.
+Perfect for sysadmins looking to streamline user provisioning while avoiding common pitfalls like invalid data or missing OUs!
 
----
+Features
+- Input Validation: Skips rows with missing or invalid FirstName, LastName, or DepartmentID.
+- Username Management: Truncates names to 20 characters and adds suffixes for uniqueness.
+- OU Verification: Checks if the target OU exists in AD before creating users.
+- Logging: Detailed logs with timestamps, levels (Info, Warning, Error, etc.), and context.
+- Password Options: Uses a fixed password ("Password!1") by default, with an optional encrypted random password feature.
+- Security: Encrypts random passwords in a log file using a user-provided key.
+- Safety Cap: Limits processing to 100 users per run to prevent overload.
 
-### **How to Use**
+Installation
 
-#### **1. Prerequisites**
+1. Ensure you have the Active Directory module installed (part of RSAT on Windows).
+   - Install RSAT via Settings > Apps > Optional Features, or run Install-WindowsFeature RSAT-AD-PowerShell on a server.
+2. Clone or download this repository:
+   git clone https://github.com/yourusername/ad-user-creation.git
+3. Place your users.csv and depts.csv files in the script directory (see Usage for format).
 
-* PowerShell 5.1 or later.
-* The **Active Directory PowerShell Module** (part of RSAT).
+Usage
 
-#### **2. Input Files**
+Prerequisites
+- PowerShell 5.1 or later.
+- Active Directory environment with appropriate permissions.
 
-Create two CSV files in the same directory as the script:
+CSV File Format
+- users.csv:
+  FirstName,LastName,DepartmentID
+  Alice,Kowalski,IT101
+  Bob,Kowalski,IT105
+- depts.csv:
+  DepartmentID;DepartmentOU
+  IT101;OU=IT,DC=example,DC=local
+  IT105;OU=Finance,DC=example,DC=local
 
-**`users.csv`**
-```csv
-FirstName,LastName,DepartmentID
-John,Doe,101
-Jane,Smith,102
+Running the Script
+1. Open PowerShell with administrative privileges.
+2. Run the script with required parameters:
+   .\New-AdUsers.ps1 -UsersCsv .\users.csv -DeptsCsv .\depts.csv -UpnSuffix "@example.local" -MailDomain "example.com"
+3. For random passwords with encryption (optional):
+   - Generate a 32-byte key (e.g., $key = [Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 }))).
+   - Run with additional parameters:
+     .\New-AdUsers.ps1 -UsersCsv .\users.csv -DeptsCsv .\depts.csv -UpnSuffix "@example.local" -MailDomain "example.com" -UseRandomPassword -PasswordLogKeyBase64 $key
 
-**`dept.csv`** (Semicolon-delimited)
-```csv
-DepartmentID;DepartmentOU
-101;OU=Sales,OU=Users,DC=example,DC=com
-102;OU=Marketing,OU=Users,DC=example,DC=com
-3. Running the Script
-Run the script from an elevated PowerShell console.
+Output
+- Logs are written to the console with timestamps and levels.
+- Encrypted password logs (if enabled) are saved to passwords.log.enc.
 
-#### **3. Basic Usage (with fixed password)
+Contributing
 
-PowerShell
+We welcome contributions to make this script even better! To contribute:
+1. Fork the repository.
+2. Create a feature branch (git checkout -b feature/new-feature).
+3. Commit your changes (git commit -m "Add new feature").
+4. Push to the branch (git push origin feature/new-feature).
+5. Open a Pull Request with a description of your changes.
 
-.\New-AdUsers.ps1 -UsersCsv .\users.csv -DeptsCsv .\depts.csv -UpnSuffix "@example.local" -MailDomain "example.com"
-Advanced Usage (with random, encrypted passwords)
+Please ensure your code follows PowerShell best practices and includes tests for edge cases (e.g., long names, special characters, missing OUs).
 
-PowerShell
+Testing
 
-# Generate a secure key (should be done once and stored in a secure vault)
-$key = [Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 } | ForEach-Object {[byte]$_}))
+- Test with large datasets (>100 users) to verify the safety cap.
+- Try names with special characters (e.g., Ł, Ø) to check ASCII normalization.
+- Use duplicate entries to confirm deduplication logic.
+- Simulate missing OUs to ensure proper logging.
 
-# Run the script with random passwords and the secure key
-.\New-AdUsers.ps1 -UsersCsv .\users.csv -DeptsCsv .\depts.csv -UpnSuffix "@example.local" -MailDomain "example.com" -UseRandomPassword -PasswordLogKeyBase64 $key
-Parameter Reference
--UsersCsv: Path to the user data file.
+License
 
--DeptsCsv: Path to the department-to-OU mapping file.
+MIT License - Feel free to use, modify, and distribute this script, but please include the original copyright notice.
 
--UpnSuffix: The UPN suffix for user accounts (e.g., @example.local).
+Acknowledgments
 
--MailDomain: The mail domain for user accounts (e.g., example.com).
+Inspired by real-world AD admin challenges and built with love for automation! Special thanks to the PowerShell community for their invaluable resources.
 
--MaxUsers: A safety limit on the number of users to process (default: 100).
-
--UseRandomPassword: A switch to enable the use of random passwords.
-
--FixedPassword: The fixed password used when -UseRandomPassword is not set.
-
--PasswordLogPath: File path for the encrypted password log (only used with -UseRandomPassword).
-
--PasswordLogKeyBase64: A Base64-encoded key required to encrypt the password log.
+Created on: 02:22 PM CEST, Monday, September 08, 2025
