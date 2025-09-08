@@ -81,8 +81,11 @@ Running the Script
 📜 Example Log Output
 - Logs are written to the console with timestamps and levels.
 - Encrypted password logs (if enabled) are saved to passwords.log.enc.
+  
 [2025-09-08 11:23:45] Info User created User=jdoe UPN=jdoe@example.local Dept=IT105 Display=John Doe
+
 [2025-09-08 11:23:45] DuplicateUserInAD User already exists, skipping User=asmith UPN=asmith@example.local Dept=FIN101 Display=Alice Smith
+
 [2025-09-08 11:23:45] MissingOU No OU mapping for department, skipping User=bbrown UPN=bbrown@example.local Dept=HR999 Display=Bob Brown
 
 
