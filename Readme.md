@@ -1,3 +1,4 @@
+# 🛠️ Active Directory User Provisioning Script
 AD User Creation Script
 
 A robust PowerShell script to automate the creation of Active Directory (AD) users from CSV files, with enhanced validation, logging, and security features.
@@ -71,6 +72,11 @@ Testing
 - Try names with special characters (e.g., Ł, Ø) to check ASCII normalization.
 - Use duplicate entries to confirm deduplication logic.
 - Simulate missing OUs to ensure proper logging.
+
+## 👤 Author
+
+Created by [Volodymyr Lisovyi](https://www.linkedin.com/in/volodymyr-lisovyi-66447649/)
+
 
 License
 
