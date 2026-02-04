@@ -1,4 +1,3 @@
-Final 
 <#
 .SYNOPSIS
   Create AD users from CSV with department-to-OU mapping (robust version).
@@ -29,7 +28,7 @@ Final
   Use random passwords instead of fixed (default fixed).
 
 .PARAMETER FixedPassword
-  Fixed password used when -UseRandomPassword is NOT supplied. Default: "Password!1" (per spec).
+  Fixed password used when -UseRandomPassword is NOT supplied. SecureString recommended.
 
 .PARAMETER PasswordLogFilePath
   When -UseRandomPassword is set: file to store encrypted username/password pairs. Default: "passwords.log.enc"
@@ -55,7 +54,7 @@ param(
   [Parameter(Mandatory)] [string]$MailDomain,
   [int]$MaxUsers = 100,
   [switch]$UseRandomPassword,
-  [string]$FixedPassword = 'Password!1',
+  [SecureString]$FixedPassword,
   [SuppressMessage('PSAvoidUsingPlainTextForPassword','PasswordLogFilePath',Justification='File path is not a secret; analyzer false-positive.')]
   [ArgumentCompleter({
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
@@ -195,7 +194,7 @@ function Ensure-UniqueSamUpn {
 try {
   $users = Import-Csv -Path $UsersCsv
 } catch {
-  Write-Error "Failed to read $UsersCsv: $($_.Exception.Message)"; return
+  Write-Error "Failed to read ${UsersCsv}: $($_.Exception.Message)"; return
 }
 
 try {
@@ -204,7 +203,7 @@ try {
     $deptMap[$_.DepartmentID.Trim()] = $_.DepartmentOU.Trim()
   }
 } catch {
-  Write-Error "Failed to read $DeptsCsv: $($_.Exception.Message)"; return
+  Write-Error "Failed to read ${DeptsCsv}: $($_.Exception.Message)"; return
 }
 
 if ($users.Count -gt $MaxUsers) {
@@ -218,8 +217,13 @@ if ($UseRandomPassword) {
   if ($PasswordLogKeyBase64) {
     try {
       $PasswordKey = [Convert]::FromBase64String($PasswordLogKeyBase64)
-      "Username,Password_Protected" | Out-File -FilePath $PasswordLogFilePath -Encoding utf8
-      Write-Log -Level 'Warning' -Message "Random passwords enabled; encrypted password log active" -Context @{ Path=$PasswordLogFilePath }
+      if ($PasswordKey.Length -ne 32) {
+        Write-Log -Level 'Warning' -Message "PasswordLogKeyBase64 must decode to 32 bytes; password log will be disabled" -Context @{ Length=$PasswordKey.Length }
+        $PasswordKey = $null
+      } else {
+        "Username,Password_Protected" | Out-File -FilePath $PasswordLogFilePath -Encoding utf8
+        Write-Log -Level 'Warning' -Message "Random passwords enabled; encrypted password log active" -Context @{ Path=$PasswordLogFilePath }
+      }
     } catch {
       Write-Log -Level 'Warning' -Message "Invalid PasswordLogKeyBase64; password log will be disabled" -Context @{ Reason=$_.Exception.Message.Substring(0,[Math]::Min(200,$_.Exception.Message.Length)) }
     }
@@ -301,7 +305,11 @@ foreach ($u in $users) {
     }
     $password = $secure
   } else {
-    $password = ConvertTo-SecureString $FixedPassword -AsPlainText -Force
+    if (-not $FixedPassword) {
+      Write-Log -Level 'Error' -Message "FixedPassword is required when UseRandomPassword is not set" -Context @{ User=$username }
+      continue
+    }
+    $password = $FixedPassword
   }
 
   # Final safety check: duplicate (SAM/UPN) right before create
