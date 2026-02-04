@@ -137,7 +137,7 @@ function Ensure-UniqueSamUpn {
   #>
   param(
     [Parameter(Mandatory)] [string]$BaseSam,
-    [Parameter(Mandatory)] [string]$UpnSuffix,  # must start with '@' (we’ll normalize)
+    [Parameter(Mandatory)] [string]$UpnSuffix,  # must start with '@' (weâ€™ll normalize)
     [switch]$LogTruncate,
     [switch]$LogDedup
   )
