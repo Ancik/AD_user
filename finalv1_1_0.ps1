@@ -42,7 +42,6 @@
 
 .EXAMPLE
   # With random passwords and encrypted password log:
-  $key = [Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 } | ForEach-Object {[byte]$_}))
   $keyPlain = [Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 } | ForEach-Object {[byte]$_}))
   $key = ConvertTo-SecureString $keyPlain -AsPlainText -Force
   .\New-AdUsers.ps1 -UsersCsv .\users.csv -DeptsCsv .\depts.csv -UpnSuffix "@example.local" -MailDomain "example.com" -UseRandomPassword -PasswordLogKeyBase64 $key -PasswordLogFilePath .\passwords.log.enc
