@@ -34,7 +34,7 @@
   When -UseRandomPassword is set: file to store encrypted username/password pairs. Default: "passwords.log.enc"
 
 .PARAMETER PasswordLogKeyBase64
-  Base64-encoded 32-byte key for ConvertFrom-SecureString -Key (e.g. from a secure vault).
+  Base64-encoded 32-byte key for ConvertFrom-SecureString -Key (e.g. from a secure vault). SecureString recommended.
   Required to write encrypted password log when -UseRandomPassword is set. If omitted, passwords are NOT logged.
 
 .EXAMPLE
@@ -43,6 +43,8 @@
 .EXAMPLE
   # With random passwords and encrypted password log:
   $key = [Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 } | ForEach-Object {[byte]$_}))
+  $keyPlain = [Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 } | ForEach-Object {[byte]$_}))
+  $key = ConvertTo-SecureString $keyPlain -AsPlainText -Force
   .\New-AdUsers.ps1 -UsersCsv .\users.csv -DeptsCsv .\depts.csv -UpnSuffix "@example.local" -MailDomain "example.com" -UseRandomPassword -PasswordLogKeyBase64 $key -PasswordLogFilePath .\passwords.log.enc
 #>
 
@@ -64,7 +66,7 @@ param(
     }
   })]
   [string]$PasswordLogFilePath = 'passwords.log.enc',
-  [string]$PasswordLogKeyBase64
+  [SecureString]$PasswordLogKeyBase64
 )
 
 # --- Prereq ----------------------------------------------------------------
@@ -108,6 +110,17 @@ function Convert-ToAscii {
   return ($ascii -replace '[^A-Za-z0-9]', '')
 }
 
+function ConvertTo-PlainText {
+  param([SecureString]$Secure)
+  if (-not $Secure) { return $null }
+  $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($Secure)
+  try {
+    [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
+  } finally {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+  }
+}
+
 function New-Username {
   param([string]$FirstName, [string]$LastName)
   $fi = Convert-ToAscii ($FirstName.Substring(0,1))
@@ -133,7 +146,7 @@ function New-RandomPassword {
   -join ($chars | Sort-Object { Get-Random })
 }
 
-function Ensure-UniqueSamUpn {
+function Get-UniqueSamUpn {
   <#
     .SYNOPSIS
       Returns a (SamAccountName, Upn) tuple that is unique in AD.
@@ -216,7 +229,8 @@ if ($users.Count -gt $MaxUsers) {
 if ($UseRandomPassword) {
   if ($PasswordLogKeyBase64) {
     try {
-      $PasswordKey = [Convert]::FromBase64String($PasswordLogKeyBase64)
+      $PasswordLogKeyPlain = ConvertTo-PlainText $PasswordLogKeyBase64
+      $PasswordKey = [Convert]::FromBase64String($PasswordLogKeyPlain)
       if ($PasswordKey.Length -ne 32) {
         Write-Log -Level 'Warning' -Message "PasswordLogKeyBase64 must decode to 32 bytes; password log will be disabled" -Context @{ Length=$PasswordKey.Length }
         $PasswordKey = $null
@@ -261,7 +275,7 @@ foreach ($u in $users) {
 
   # Ensure SAM/UPN uniqueness (with truncation + numeric suffix)
   try {
-    $result = Ensure-UniqueSamUpn -BaseSam $baseUser -UpnSuffix $suffix -LogTruncate -LogDedup
+    $result = Get-UniqueSamUpn -BaseSam $baseUser -UpnSuffix $suffix -LogTruncate -LogDedup
   } catch {
     Write-Log -Level 'ADQuery' -Message "Failed to ensure unique SAM/UPN" -Context @{ Base=$baseUser; Reason=$_.Exception.Message.Substring(0,[Math]::Min(200,$_.Exception.Message.Length)) }
     continue
@@ -282,7 +296,7 @@ foreach ($u in $users) {
 
   # Verify OU exists in AD
   try {
-    $ouObj = Get-ADOrganizationalUnit -Identity $ouPath -ErrorAction Stop
+    $null = Get-ADOrganizationalUnit -Identity $ouPath -ErrorAction Stop
   } catch {
     $ctxErr = $ctx.Clone()
     $ctxErr['OU'] = $ouPath
